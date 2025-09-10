@@ -85,3 +85,92 @@ body{
     background: rgba(216, 216, 221, 0.5);
 }
 
+/* Container section */
+.container{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.section{
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.section.active{
+    display: block;
+}
+
+@kayfames fadeIn{
+    from {
+        opacity: 0; 
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* hero section */
+.hero{
+    text-align: center;
+    padding: 4rem 0;
+}
+
+.hero-title{
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle{
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    margin-bottom: 3rem;
+}
+
+.hero-stats{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+.stat-card{
+    background-color: var(--surface-color);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.stat-card:hover{
+    transform: scale(1.05);
+    box-shadow: var(--shadow);
+    border-color: var(--primary-color);
+}
+
+.stat-card i{
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.stat-card span{
+    display: block;
+    font-size: 2rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.stat-card p{
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
