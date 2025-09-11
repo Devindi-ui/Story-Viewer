@@ -58,7 +58,55 @@
                 </div>
             </div>
          </section>
+
+         <!-- create story section -->
+          <section id="createSection" class="section">
+            <div class="create-container">
+                <h2 class="section-title">Create Your Story</h2>
+                <form id="storyForm" class="story-form">
+                    <div class="form-group">
+                        <label for="story-title">Story Title</label>
+                        <input type="text" id="storyTitle" placeholder="Enter the title">
+                    </div>
+                    <div class="form-group">
+                        <label for="storyGenre">Story Genre</label>
+                        <select id="storyGenre">
+                            <option value="">Select a Genre</option>
+                            <option value="fantacy">Fantacy</option>
+                            <option value="sci-fi">Science Fiction</option>
+                            <option value="mystery">Mystery</option>
+                            <option value="ramance">Romance</option>
+                            <option value="horror">Horror</option>
+                            <option value="drama">Drama</option>
+                            <option value="adventure">Adventure</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="authorName">Your Name</label>
+                        <input type="text" id="authorName" placeholder=" Enter Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="storyContent">Opening Chapter</label>
+                        <textarea type="text" id="storyContent" placeholder="Begin your story here. engaging to encourage others to continue!">
+                    </div>
+                    <div class="form-group">
+                        <label for="storyPromt">Continuation Prompt</label>
+                        <input type="text" id="storyPromt" placeholder="What should happen contributers a hint...">
+                    </div>
+                    <button class="submit-btn">
+                        <i class="fas fa-magic"></i> Create Story
+                    </button>
+
+                </form>
+            </div>
+          </section>
       </div>
+
+      <!-- Loading spinner -->
+       <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+       </div>
 
     <!-- firebase sdk  -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
