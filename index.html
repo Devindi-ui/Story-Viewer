@@ -60,7 +60,7 @@
          </section>
 
          <!-- create story section -->
-          <section id="createSection" class="section">
+          <section id="createSection" class="section active">
             <div class="create-container">
                 <h2 class="section-title">Create Your Story</h2>
                 <form id="storyForm" class="story-form">
@@ -88,6 +88,7 @@
                     <div class="form-group">
                         <label for="storyContent">Opening Chapter</label>
                         <textarea type="text" id="storyContent" placeholder="Begin your story here. engaging to encourage others to continue!">
+                        </textarea>
                     </div>
                     <div class="form-group">
                         <label for="storyPromt">Continuation Prompt</label>
@@ -100,6 +101,76 @@
                 </form>
             </div>
           </section>
+
+          <!-- Explore section -->
+           <section id="exploreSection" class="section ">
+            <div class="explore-container">
+                <h2 class="section-title">Explore Staories</h2>
+                <div class="filter-controls">
+                    <select id="genreFilter">
+                        <option value="">Select a Genre</option>
+                        <option value="fantacy">Fantacy</option>
+                        <option value="sci-fi">Science Fiction</option>
+                        <option value="mystery">Mystery</option>
+                        <option value="ramance">Romance</option>
+                        <option value="horror">Horror</option>
+                        <option value="drama">Drama</option>
+                        <option value="adventure">Adventure</option>
+                    </select>
+                    <select id="sortFilter">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="popular">Most Popular</option>
+                    </select>
+                </div>
+                <div id="storiesGrid" class="stories-grid">
+                    <!-- stories will be loaded here -->
+                </div>
+            </div>
+           </section>
+
+           <!-- story render model -->
+            <div class="modal" id="storyModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="modalStoryTitle">Title</h3>
+                        <button class="close-btn">
+                            <i class="fas fa-times"></i> 
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="story-info">
+                            <span class="story-genre" id="modalStory">Horror</span>
+                            <span class="story-author" id="modalStoryAuthor">Devindi</span>
+                            <span class="story-date" id="modalStoryDate">2024-11-01</span>
+                        </div>
+                        <div class="story-chapters" id="storyChapters">
+                            <!-- chapters will be loaded here -->
+                        </div>
+                        <div class="contribution-section">
+                            <h4>Continue the story</h4>
+                            <p class="promt-text" id="currentPrompt">cdscdscdscds</p>
+                            <form id="contributionForm" class="contribution-form">
+                                <div class="form-group">
+                                    <label for="contributorName">Your Name</label>
+                                    <input type="text" id="contributorName" placeholder="Enter your name..." required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contibutionText">Your Contribution</label>
+                                    <textarea id="contributionText" placeholder="Continue the story..." required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="nextPrompt"> Next Prompt (Optional)</label>
+                                    <input type="text" id="nextPrompt" placeholder="What should happen next..?">
+                                </div>
+                                <button class="submit-btn" type="submit">
+                                    <i class="fas fa-plus"></i> Add Chapter
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
       </div>
 
       <!-- Loading spinner -->
@@ -107,6 +178,9 @@
         <div class="spinner"></div>
         <p>Loading...</p>
        </div>
+
+       <!-- Toast notification -->
+        <div id="toast" class="toast"></div>
 
     <!-- firebase sdk  -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
