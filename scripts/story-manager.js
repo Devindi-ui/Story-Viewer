@@ -101,8 +101,202 @@ class StoryManager{
             throw error;
         }
     }
+
+    async getStories(filters = {}){
+        try {
+            showLoading(true);
+
+            let query = storiesCollection.where('status', '==', 'active');
+
+            if(filters.genre){
+                query = query.where('genre', '==', filters.genre);
+            }
+
+            switch(filters.sort){
+                case 'oldest':
+                    query = query.orderBy('createdAt', 'asc');
+                    break;
+                case 'popular':
+                    query = query.orderBy('views', 'desc');
+                    break;
+                case 'newest':
+                    default:
+                        query = query.orderBy('createdAt', 'desc');
+            }
+
+            query = query.limit(50);
+
+            const snapshot = await query.get();
+            const stories = [];
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                stories.push({
+                    id: doc.id,
+                    ...data,
+                    createdAt: data.createdAt?.toDate(),
+                    updatedAt: data.updatedAt?.toDate()
+                });
+            });
+
+            this.stories = stories;
+            showLoading(false);
+
+            return stories;
+
+        } catch (error) {
+            showLoading(false);
+            console.error('Error in get Stories: ', error);
+            return [];
+        }
+    }
+
+    async getStoryWithChapters(storyId){
+        try {
+            showLoading(true);
+
+            const storyDoc = await storiesCollection.doc(storyId).get();
+
+            if(!storyDoc.exists){
+                throw new Error('Story not found');
+            }
+
+            const storyData = storyDoc.data();
+
+            const chapterSnapshot = await chaptersCollection
+            .where('storyId', '==', storyId)
+            .orderBy('chapterNumber', 'asc').get();
+
+            const chapter = [];
+
+            chapterSnapshot.forEach(doc => {
+                const data = doc.data();
+                chapters.push({
+                    id: doc.id,
+                    ...data,
+                    createdAt: data.createdAt?.toDate()
+                });
+            });
+
+            //increment view count
+            await storiesCollection.doc(storyId).update({
+                views: firebase.firestore.FieldValue.increment(1)
+            });
+
+            const story = {
+                id: storyDoc.id,
+                ...storyData,
+                chapters,
+                createdAt: storyData.createdAt.toDate(),
+                updatedAt: storyData.updatedAt.toDate()
+            }
+
+            this.currentStory = story;
+            showLoading(false);
+
+            return story;
+
+        } catch (error) {
+            showLoading(false);
+            throw error;
+        }
+    }
+
+    async searchStory(searchTerm){
+        try {
+            if(!searchTerm.trim()){
+                return this.stories;
+            }
+
+            showLoading(true);
+
+            const query = storiesCollection.where('status', '==', 'active')
+            .orderBy('title')
+            .startAt(searchTerm.toLowerCase())
+            .endAt(searchTerm.toLowerCase())
+            .limit(20);
+
+            const snapshot = await query.get();
+            const results = []
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                    results.push({
+                        id: doc.id,
+                        ...data,
+                        createdAt: data.createdAt?.toDate(),
+                        updatedAt: data.updatedAt?.toDate()                        
+                    });                
+            });
+
+            return results;
+
+            
+        } catch (error) {
+            showLoading(false);
+            return[];
+        }
+    }
+
+    async likeStory(storyId){
+        try {
+            await storiesCollection.doc(storyId).update({
+                likes: firebase.firebase.FieldValue.increment(1)
+            });
+        } catch (error) {
+            
+        }
+    }
+
+    async reportStory(storyId, reason){
+        try {
+            await db.collection('reports').add({
+                storyId,
+                reason,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                type: 'story'
+            });
+
+        } catch (error) {
+            
+        }
+    }
+
+    async getStatistics(){
+        try {
+            //get total stories count
+            const storiesSnapshot = await storiesCollection
+            .where('status', '==', 'active').get();
+            const totalStories = storiesSnapshot.size;
+
+            //calculate total chapter
+            let totalContributions = 0;
+            storiesSnapshot.forEach(doc => {
+                const data =doc.data();
+                totalContributions += data.chapterCount || 1;
+            });
+
+            //get featured stories count
+            const featuredSnapshot = await storiesSnapshot
+            .where('featured', '==', true)
+            .where('status', '==', 'active')
+            .get();
+
+            const featuredStories = featuredStories.size;
+
+            return{
+                totalStories,
+                totalContributions,
+                featuredStories
+            };
+
+        } catch (error) {
+            
+        }
+    }
+
 }
 
-//crete global instance
+//create global instance
 const storymanager = new StoryManager();
 window.storyManager = storyManager;
