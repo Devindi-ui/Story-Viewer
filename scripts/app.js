@@ -80,6 +80,127 @@ class App{
         }
     }
 
+    /**
+     * Handle contribution form submission
+     * @param {Event} e - form submit event 
+     */
+    async handleContributionSubmission(e){
+        e.preventDefault();
+
+        const contributorName = document.getElementsByName('contributerName').value.trim();
+        const contributionText = document.getElementById('contributionText').value.trim();
+        const nextPrompt = document.getElementById('nextPrompt').value.trim();
+
+        //validate contribution data
+        if(!contributionText || !contributorName){
+            showToast('Contribution must be at least 50 characters long', 'error');
+            return;
+        }
+
+        try {
+            const currentStory = storyManager.currentStory;
+            const nextChapter = currentStory.chapters.length + 1;
+
+            await storyManager.addChapter(currentStory.id, {
+                content: contributionText,
+                author: contributorName,
+                prompt: nextPrompt,
+                chapterNumber: nextChapterNumber
+            });
+
+            //reload the story to show the new chapter
+            await this.openStoryModal(currentStory.id);
+
+            //reset contribution form
+            document.getElementById('contributionForm').reset();
+
+        } catch (error) {
+            console.error('Error adding contribution:', error);
+            showToast(`Error adding contribution: ${error}`, 'error');
+        }
+    }
+
+    /**
+     * open story model and load story content
+     * @param (string) storyId - story id to load
+     */
+    async openStoryModal(storyId){
+        try {
+            const story = await storyManager.getstoryWithChapters(storyId);
+            this.renderStoryModal(story);
+            this.showModal();
+        } catch (error) {
+            console.error('Error loading story:', error);
+            showToast(`Error loading story: $(error)`, 'error');
+        }
+    }
+
+    async renderStoryModal(story){
+        //update modal header
+        document.getElementById('modalStoryTitle').textContent = story.title;
+        document.getElementById('modalStoryGenre').textContent= story.genre;
+        document.getElementById('modalStoryAuthor').textContent = story.author;
+        document.getElementById('modalStoryDate').textContent = 
+            story.createdAt ? story.createdAt.toLocalDateString() : 'Unknown';
+
+        //Render chapter
+        const chapterContainer = document.getElementById('storyChapters');
+        chapterContainer.innerHTML = story.chapters.map(chapter => 
+            this.createChapterHtml(chapter)).join('');
+
+        //update current prompt
+        const lastChapter = story.chapters(story.chapter.length - 1);
+        const currentPrompt = lastChapter?.prompt || 'Continue the story...';
+        document.getElementById('currentPrompt').textContent = currentPrompt;
+
+    }
+
+    /**
+     * Create chapter HTML
+     * @param {object} chapter - chapter object
+     * @returns {string} HTML string
+     */
+    createChapterHtml(chapter){
+        const createdDate = chapter.createdAt ?
+        chapter.createdAt.toLocalDateString(): 'Unknown';
+
+        return `
+            <div class="chapter">
+                <div class="chapter-header">
+                    <span class="chapter-number">Chapter ${chapter.chapterNumber}</span>
+                    <span class="chapter-author">By ${chapter.author} . ${createdDate}</span>
+                </div>
+                <div class="chapter-content">
+                    ${chapter.content}
+                </div>
+            </div>
+        `;
+    }
+
+    showModal(){
+        const modal = document.getElementById('storyModal');
+        modal.classList.add('active');
+        this.isModalOpen = true;
+
+        //prevent body scroll
+        document.body.style.overflow = 'hidden';
+
+        //focus management for accessibility
+        modal.querySelector('.close-btn').focus();
+    }
+
+    closeModal(){
+        const modal = document.getElementById('storyModal');
+        modal.classList.remove('active');
+        this.isModalOpen = false;
+
+        document.body.style.overflow = '';
+        storyManager.currentStory = null;
+    }
+
+    /**
+     * reset the create story form
+     */
     resetCreateForm(){
         document.getElementById('story-form').reset();
 
