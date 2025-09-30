@@ -1,16 +1,16 @@
 //config firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBcMUvb8ejXfpeFfjDOQMJLum8O9Ny5ysM",
-  authDomain: "storyviewer-8a7ae.firebaseapp.com",
-  projectId: "storyviewer-8a7ae",
-  storageBucket: "storyviewer-8a7ae.firebasestorage.app",
-  messagingSenderId: "155494470567",
-  appId: "1:155494470567:web:e46f8ad3a466deaa6d1c82",
-  measurementId: "G-TLWVN083GR"
+  apiKey: "AIzaSyCrOyqxe87AqtuphIsKjvyfl6EtXAmTg2g",
+  authDomain: "storyviewer-93192.firebaseapp.com",
+  projectId: "storyviewer-93192",
+  storageBucket: "storyviewer-93192.firebasestorage.app",
+  messagingSenderId: "965607283205",
+  appId: "1:965607283205:web:bc63f88278371ca27e9a6c",
+  measurementId: "G-KPGQ3J9EC0"
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // collection references
@@ -21,6 +21,7 @@ const chaptersCollection = db.collection('chapters');
 function handleFirebaseError (error) {
     const errorMessages = {
         'permission-denied': 'You do not have permission to perform this action.',
+        
         'unavailable': 'Service is currently unavailable. Please try again later.',
         'deadline-exceeded': 'Request timed out. Please check your connection.',
         'resource-exhausted': 'Too many requests. Please try again later.',

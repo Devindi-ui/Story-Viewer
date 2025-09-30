@@ -7,6 +7,8 @@ class App{
 
     init(){
         this.bindEvent();
+        this.loadDashboardStats();
+        this.showSection('home');
     }
 
     //bind all eventlistners
@@ -25,8 +27,34 @@ class App{
         });
 
         //form submission
-        document.getElementById('struForm').addEventListener('submit', (e) => {
+        document.getElementById('storyForm').addEventListener('submit', (e) => {
             this.handleStorySubmission(e);
+        });
+        document.getElementById('contributionForm').addEventListener('submit', (e) => {
+            this.handleContributionSubmission(e);
+        });
+
+        //modal event
+        document.getElementById('closeModal').addEventListener('click', () => {
+            this.closeModal();
+        });
+        document.getElementById('storyModal').addEventListener('click', (e) => {
+            if(e.target.id === 'storyModal') this.closeModal();
+        });
+
+        //filter events
+        document.getElementById('genreFilter').addEventListener('change', (e) => {
+            this.handleFilterChange(e)
+        });
+        document.getElementById('sortFilter').addEventListener('change', (e) => {
+            this.handleFilterChange(e)
+        });
+
+        //key events
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape' && this.isModalOpen){
+                this.closeModal();
+            }
         })
     }
 
@@ -60,21 +88,21 @@ class App{
         const formData = new FormData(e.target);
 
         const storyData = {
-            title : formData.get('title') || document.getElementById(storyTitle).value,
-            genre : formData.get('genre') || document.getElementById(storyGenre).value,
-            author : formData.get('author') || document.getElementById(authorName).value,
-            content : formData.get('content') || document.getElementById(storyContent).value,
-            prompt : formData.get('prompt') || document.getElementById(storyPrompt).value,
+            title : formData.get('title') || document.getElementById('storyTitle').value,
+            genre : formData.get('genre') || document.getElementById('storyGenre').value,
+            author : formData.get('author') || document.getElementById('authorName').value,
+            content : formData.get('content') || document.getElementById('storyContent').value,
+            prompt : formData.get('prompt') || document.getElementById('storyPrompt').value
         };
 
-        if(this.validateStoryData(storyData)){
+        if(!this.validateStoryData(storyData)){
             return;
         }
 
         try {
             const storyId = await StoryManager.createStory(storyData);
             this.resetCreateForm();
-            showToast('Story created successfully', 'success');
+            showToast('Story created successfully!', 'success');
         } catch (error) {
             console.error('error creating story: ', error);
         }
@@ -133,6 +161,44 @@ class App{
             console.error('Error loading story:', error);
             showToast(`Error loading story: $(error)`, 'error');
         }
+    }
+
+    /**
+     * Handle filter changes i explore section
+     * @param {Event} e 
+     */
+    handleFilterChange(e){
+        clearTimeout(this.filterTimeout);
+        this.filterTimeout = setTimeout(() => {
+            this.loadStories();
+        },300);
+    }
+
+    /**
+     * Handle search functionallity
+     * @param {string} searchTerm - search query
+     */
+    async handleSearch(searchTerm){
+        if(searchTerm.trim()){
+            const results = await storyManager.searchStories(searchTerm);
+            this.renderStories(results);
+        }else{
+            this.loadStories();
+        }
+    }
+
+    /**
+     * reset the create story form
+     */
+    resetCreateForm(){
+        document.getElementById('storyForm').reset();
+
+        // clear any validaion style
+        document.querySelectorAll('.form-group input, .form-group select, .form-group textarea')
+        .forEach(field => {
+            field.classList.remove('error');
+        });
+
     }
 
     async renderStoryModal(story){
@@ -199,17 +265,138 @@ class App{
     }
 
     /**
-     * reset the create story form
+     * Load and display statics
      */
-    resetCreateForm(){
-        document.getElementById('story-form').reset();
+    async loadDashboardStats(){
+        try {
+            const stats = await storyManager.getStatistics();
 
-        // clear any validaion style
-        document.querySelectorAll('.form-group input, .form-group select, .form-group textarea')
-        .forEach(field => {
-            field.classList.remove('error');
-        });
+            //animate counter update
+            this.animateCounter('totalStories', stats.totalStories);
+            this.animateCounter('totalContributions', stats.totalContributions);
+            this.animateCounter('featuredStories', stats.featuredStories);
+        } catch (error) {
+            console.error('Error loading dashboard stats: ', error);
+            showToast(`Error loading dashboard stats:  ${error}`, error);
+        }
+    }
 
+    /**
+     * 
+     * @param {string} elementById - id of element to animate
+     * @param {number} targetValue - target number to count to
+     */
+    animateCounter(elementById, targetValue){
+        const element = document.getElementById(elementById);
+        const duration = 2000;
+        const startTime = performance.now();
+        const startValue = 0;
+
+        const updateCounter = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+            const currentValue = Math.floor(startValue + 
+                (targetValue - startValue ) * easeOutQuart);
+
+            element.textContent = currentValue.toLocaleString();
+
+            if(progress < 1){
+                requestAnimationFrame(updateCounter);
+            }
+        };
+        requestAnimationFrame(updateCounter);
+    }
+
+    /**
+     * Load and display stories in the explore section
+     */
+    async loadStories(){
+        const filters = {
+            genre: document.getElementById('genreFilter').value,
+            sort: document.getElementById('sortFilter').value
+        }
+        const stories = await storyManager.getStories(filters);
+        this.renderStories(stories);
+    }
+
+    renderStories(stories){
+        const grid = document.getElementById('storiesGrid');
+
+        if(stories.length === 0){
+            grid.innerHtml = `
+                <div class="no-stories">
+                    <i class="fas fa-book-open"></i>
+                    <h3>No Stories Found</h3>
+                    <p>Be the first to create a story in this category</p>
+                    <button class="submit-btn" onClick="app.showSection('create')">
+                        <i class="fas fa-plus"></i> Create Story
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = stories.map(story => this.createStoryCard(story)).join(' ');
+    }
+
+    /**
+     * 
+     * @param {object} story - Story object
+     * @returns {string} html string
+     */
+    createStory(story){
+        const createdDate = story.createdAt ? story.createdAt.toLocalDateString()
+            :'Unknown';
+        const preview = story.content ? story.content.subString(0, 150) + '...'
+            :'No preview available';
+
+        return `
+            <div class="story-card" onClick="app.openStoryModal('${story.id}')">
+                <div class="story-card-header">
+                    <div>
+                        <h3 class="story-title">${story.title}</h3>
+                        <div class="story-meta">                           
+                            <span class="story-author">by ${story.author}</span>
+                            <span class="story-date">by ${createdDate}</span>
+                        </div>
+                    </div>
+                    <span class="story-genre">by ${story.genre}</span>
+                </div>
+
+                <p class="story-preview">${preview}</p>
+
+                <div class="story-stats">
+                    <div class="story-stat">
+                        <i class="fas fa-book"></i>
+                        <span>${story.chapterCount || 1} chapters</span>
+                    </div>
+                    <div class="story-stat">
+                        <i class="fas fa-users"></i>
+                        <span>${story.contributorCount || 1} contributors</span>
+                    </div>
+                    <div class="story-stat">
+                        <i class="fas fa-eye"></i>
+                        <span>${story.views || 1} views</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * open story model and load story content
+     * @param {string} storyId story id to load
+     */
+    async openStoryModal(storyId){
+        try {
+            const story = await storyManager.getstoryWithChapters(storyId);
+            this.renderStoryModal(story);
+            this.showModal();
+        } catch (error) {
+            console.error('Error loading story:', error);
+        }
     }
 
     /**
@@ -296,5 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 //export for global access 
 window.appUtils = {
-    showLoading
+    showLoading,
+    showToast,
+    formatDate
 }

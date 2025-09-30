@@ -42,12 +42,15 @@ class StoryManager{
             });
 
             showLoading(false);
+            showToast('Story created successfully!', 'success');
 
             return docRef.id;
 
         } catch (error) {
             showLoading(false);
             console.error('error in chapter: ', error);
+            const message = handleFirebaseError(error);
+            showToast(message, 'error');
             throw error;
         }
     }
@@ -61,7 +64,7 @@ class StoryManager{
                 storyId: storyId,
                 content: chapterData.content.trim(),
                 author: chapterData.author.trim(),
-                prompt: chapterData.prompt ? chapterData.trim() : '',
+                prompt: chapterData.prompt ? chapterData.prompt.trim() : '',
                 chapterNumber: chapterData.chapterNumber,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 likes: 0,
@@ -92,12 +95,15 @@ class StoryManager{
             }
 
             showLoading(false);
+            showToast('Chapter added successfully!', 'success');
 
             return chapterRef.id;
 
         } catch (error) {
             showLoading(false);
             console.error('Chapter error: ', error);
+            const message = handleFirebaseError(error);
+            showToast(message, 'error');
             throw error;
         }
     }
@@ -147,6 +153,8 @@ class StoryManager{
         } catch (error) {
             showLoading(false);
             console.error('Error in get Stories: ', error);
+            const message = handleFirebaseError(error);
+            showToast(message, 'error');
             return [];
         }
     }
@@ -198,6 +206,8 @@ class StoryManager{
 
         } catch (error) {
             showLoading(false);
+            const message = handleFirebaseError(error);
+            showToast(message, 'error');
             throw error;
         }
     }
@@ -229,11 +239,14 @@ class StoryManager{
                     });                
             });
 
+            showLoading(false);
             return results;
 
             
         } catch (error) {
             showLoading(false);
+            const message = handleFirebaseError(error);
+            showToast(message, 'error');
             return[];
         }
     }
@@ -241,10 +254,13 @@ class StoryManager{
     async likeStory(storyId){
         try {
             await storiesCollection.doc(storyId).update({
-                likes: firebase.firebase.FieldValue.increment(1)
+                likes: firebase.firestore.FieldValue.increment(1)
             });
+            showToast('Liked story', 'success');
+
         } catch (error) {
-            
+            const message = handleFirebaseError(error);
+            showToast(message, 'error');
         }
     }
 
@@ -258,7 +274,8 @@ class StoryManager{
             });
 
         } catch (error) {
-            
+            const message = handleFirebaseError(error);
+            showToast(message, 'error');
         }
     }
 
@@ -277,12 +294,12 @@ class StoryManager{
             });
 
             //get featured stories count
-            const featuredSnapshot = await storiesSnapshot
+            const featuredSnapshot = await storiesCollection
             .where('featured', '==', true)
             .where('status', '==', 'active')
             .get();
 
-            const featuredStories = featuredStories.size;
+            const featuredStories = featuredSnapshot.size;
 
             return{
                 totalStories,
@@ -291,12 +308,18 @@ class StoryManager{
             };
 
         } catch (error) {
-            
+            const message = handleFirebaseError(error);
+            showToast(message, 'error');
+            return{
+                totalStories: 0 ,
+                totalContributions: 0,
+                featuredStories: 0
+            };
         }
     }
 
 }
 
 //create global instance
-const storymanager = new StoryManager();
+const storyManager = new StoryManager();
 window.storyManager = storyManager;

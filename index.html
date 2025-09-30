@@ -60,7 +60,7 @@
          </section>
 
          <!-- create story section -->
-          <section id="createSection" class="section active">
+          <section id="createSection" class="section">
             <div class="create-container">
                 <h2 class="section-title">Create Your Story</h2>
                 <form id="storyForm" class="story-form">
@@ -91,8 +91,8 @@
                         </textarea>
                     </div>
                     <div class="form-group">
-                        <label for="storyPromt">Continuation Prompt</label>
-                        <input type="text" id="storyPromt" placeholder="What should happen contributers a hint...">
+                        <label for="storyPrompt">Continuation Prompt</label>
+                        <input type="text" id="storyPrompt" placeholder="What should happen contributers a hint...">
                     </div>
                     <button class="submit-btn">
                         <i class="fas fa-magic"></i> Create Story
@@ -103,7 +103,7 @@
           </section>
 
           <!-- Explore section -->
-           <section id="exploreSection" class="section ">
+           <section id="exploreSection" class="section">
             <div class="explore-container">
                 <h2 class="section-title">Explore Staories</h2>
                 <div class="filter-controls">
@@ -134,7 +134,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3 id="modalStoryTitle">Title</h3>
-                        <button class="close-btn">
+                        <button id="closeModal" class="close-btn">
                             <i class="fas fa-times"></i> 
                         </button>
                     </div>
@@ -183,10 +183,10 @@
         <div id="toast" class="toast"></div>
 
     <!-- firebase sdk  -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app-compact.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-    <script src="/scripts/firebase.config.js"></script>
+    <script src="/scripts/firebase-config.js"></script>
     <script src="/scripts/story-manager.js"></script>
     <script src="/scripts/app.js"></script>
 </body>
