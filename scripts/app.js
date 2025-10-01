@@ -94,15 +94,18 @@ class App{
             content : formData.get('content') || document.getElementById('storyContent').value,
             prompt : formData.get('prompt') || document.getElementById('storyPrompt').value
         };
+        console.log(storyData);
 
         if(!this.validateStoryData(storyData)){
             return;
-        }
+        }      
 
         try {
-            const storyId = await StoryManager.createStory(storyData);
+            alert('Done');
+            const storyId = await storyManager.createStory(storyData);
             this.resetCreateForm();
             showToast('Story created successfully!', 'success');
+            
         } catch (error) {
             console.error('error creating story: ', error);
         }
@@ -115,7 +118,7 @@ class App{
     async handleContributionSubmission(e){
         e.preventDefault();
 
-        const contributorName = document.getElementsByName('contributerName').value.trim();
+        const contributorName = document.getElementById('contributerName').value.trim();
         const contributionText = document.getElementById('contributionText').value.trim();
         const nextPrompt = document.getElementById('nextPrompt').value.trim();
 
@@ -127,7 +130,7 @@ class App{
 
         try {
             const currentStory = storyManager.currentStory;
-            const nextChapter = currentStory.chapters.length + 1;
+            const nextChapterNumber = currentStory.chapters.length + 1;
 
             await storyManager.addChapter(currentStory.id, {
                 content: contributionText,
@@ -154,12 +157,12 @@ class App{
      */
     async openStoryModal(storyId){
         try {
-            const story = await storyManager.getstoryWithChapters(storyId);
+            const story = await storyManager.getStoryWithChapters(storyId);
             this.renderStoryModal(story);
             this.showModal();
         } catch (error) {
             console.error('Error loading story:', error);
-            showToast(`Error loading story: $(error)`, 'error');
+            showToast(`Error loading story: ${error}`, "error");
         }
     }
 
@@ -207,7 +210,7 @@ class App{
         document.getElementById('modalStoryGenre').textContent= story.genre;
         document.getElementById('modalStoryAuthor').textContent = story.author;
         document.getElementById('modalStoryDate').textContent = 
-            story.createdAt ? story.createdAt.toLocalDateString() : 'Unknown';
+            story.createdAt ? story.createdAt.toLocaleDateString() : 'Unknown';
 
         //Render chapter
         const chapterContainer = document.getElementById('storyChapters');
@@ -215,7 +218,7 @@ class App{
             this.createChapterHtml(chapter)).join('');
 
         //update current prompt
-        const lastChapter = story.chapters(story.chapter.length - 1);
+        const lastChapter = story.chapters[story.chapter.length - 1];
         const currentPrompt = lastChapter?.prompt || 'Continue the story...';
         document.getElementById('currentPrompt').textContent = currentPrompt;
 
@@ -346,10 +349,10 @@ class App{
      * @param {object} story - Story object
      * @returns {string} html string
      */
-    createStory(story){
-        const createdDate = story.createdAt ? story.createdAt.toLocalDateString()
+    createStoryCard(story){
+        const createdDate = story.createdAt ? story.createdAt.toLocaleDateString()
             :'Unknown';
-        const preview = story.content ? story.content.subString(0, 150) + '...'
+        const preview = story.content ? story.content.substring(0, 150) + '...'
             :'No preview available';
 
         return `
@@ -391,7 +394,7 @@ class App{
      */
     async openStoryModal(storyId){
         try {
-            const story = await storyManager.getstoryWithChapters(storyId);
+            const story = await storyManager.getStoryWithChapters(storyId);
             this.renderStoryModal(story);
             this.showModal();
         } catch (error) {
@@ -406,9 +409,6 @@ class App{
     */
     validateStoryData(storyData){
         const errors = [];
-
-        if(!storyData){
-            const errors = [];
 
             if(!storyData.title || storyData.title.length < 3){
                 errors.push('Title must be at least 3 characters long');
@@ -426,17 +426,16 @@ class App{
                 errors.push('Story content must be at least 100 characters long');
             }
 
-            if(!storyData.content || storyData.prompt.length < 10){
+            if(!storyData.prompt || storyData.prompt.length < 10){
                 errors.push('Story prompt must be at least 10 characters long');
             }
 
             if(errors.length > 0){
-                showToast(errors.json(' '), 'error');
+                showToast(errors.join(' '), 'error');
                 return false;
             }
 
             return true;
-        }
     }
 
 }
@@ -478,7 +477,7 @@ function formatDate(date){
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.add = new App();
+    window.app = new App();
 });
 
 //export for global access 
