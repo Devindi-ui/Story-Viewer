@@ -222,7 +222,7 @@ class StoryManager{
             .where('storyId', '==', storyId)
             .orderBy('chapterNumber', 'asc').get();
 
-            const chapter = [];
+            const chapters = [];
 
             chapterSnapshot.forEach(doc => {
                 const data = doc.data();
@@ -242,8 +242,8 @@ class StoryManager{
                 id: storyDoc.id,
                 ...storyData,
                 chapters,
-                createdAt: storyData.createdAt.toDate(),
-                updatedAt: storyData.updatedAt.toDate()
+                createdAt: storyData.createdAt?.toDate(),
+                updatedAt: storyData.updatedAt?.toDate()
             }
 
             this.currentStory = story;

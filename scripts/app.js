@@ -55,6 +55,17 @@ class App{
             if(e.key === 'Escape' && this.isModalOpen){
                 this.closeModal();
             }
+        });
+
+        //story card click event
+        document.addEventListener('click', (e) => {
+            const storyCard = e.target.closest('.story-card');
+            if(storyCard){
+                const storyId = storyCard.getAttribute('data-story-id');
+                if(storyId){
+                    this.openStoryModal(storyId);
+                }
+            }
         })
     }
 
@@ -75,6 +86,18 @@ class App{
         document.getElementById(`${sectionName}Btn`).classList.add('active');
 
         this.currentSection = sectionName;
+
+        switch(sectionName){
+            case 'home':
+                this.loadDashboardStats();
+                break;
+            case 'explore':
+                this.loadStories();
+                break;
+            case 'create':
+                this.resetCreateForm();
+                break;
+        }
     }
 
     /**
@@ -118,7 +141,7 @@ class App{
     async handleContributionSubmission(e){
         e.preventDefault();
 
-        const contributorName = document.getElementById('contributerName').value.trim();
+        const contributorName = document.getElementById('contributorName').value.trim();
         const contributionText = document.getElementById('contributionText').value.trim();
         const nextPrompt = document.getElementById('nextPrompt').value.trim();
 
@@ -218,7 +241,7 @@ class App{
             this.createChapterHtml(chapter)).join('');
 
         //update current prompt
-        const lastChapter = story.chapters[story.chapter.length - 1];
+        const lastChapter = story.chapters[story.chapters.length - 1];
         const currentPrompt = lastChapter?.prompt || 'Continue the story...';
         document.getElementById('currentPrompt').textContent = currentPrompt;
 
@@ -231,7 +254,7 @@ class App{
      */
     createChapterHtml(chapter){
         const createdDate = chapter.createdAt ?
-        chapter.createdAt.toLocalDateString(): 'Unknown';
+        chapter.createdAt.toLocaleDateString(): 'Unknown';
 
         return `
             <div class="chapter">
@@ -328,7 +351,7 @@ class App{
         const grid = document.getElementById('storiesGrid');
 
         if(stories.length === 0){
-            grid.innerHtml = `
+            grid.innerHTML = `
                 <div class="no-stories">
                     <i class="fas fa-book-open"></i>
                     <h3>No Stories Found</h3>
@@ -356,7 +379,7 @@ class App{
             :'No preview available';
 
         return `
-            <div class="story-card" onClick="app.openStoryModal('${story.id}')">
+            <div class="story-card" data-story-id="${story.id}">
                 <div class="story-card-header">
                     <div>
                         <h3 class="story-title">${story.title}</h3>
@@ -443,9 +466,9 @@ class App{
 function showLoading(show){
     const spinner = document.getElementById('loadingSpinner');
     if (show) {
-        spinner.classList.add = 'active';
+        spinner.classList.add('active');
     } else {
-        spinner.classList.remove = 'active';
+        spinner.classList.remove('active');
     }
 }
 
@@ -473,7 +496,7 @@ function formatDate(date){
     if(diffDays < 30) return `${Math.ceil(diffDays/7)} weeks ago`;
     if(diffDays < 365) return `${Math.ceil(diffDays/30)} months ago`
 
-    return date.toLocalDateString();
+    return date.toLocaleDateString();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
